@@ -2,8 +2,9 @@ use colored::Colorize;
 use dialoguer::{Confirm, Input};
 use sqlite::Connection;
 use crate::repository::TaskRepository;
+use crate::cli::Error;
 
-pub fn delete(db: &Connection, task_id: Option<i64>) -> () {
+pub fn delete(db: &Connection, task_id: Option<i64>) -> Result<(), Error> {
     let task_id = task_id.unwrap_or_else(||Input::new()
         .with_prompt("Task id")
         .interact_text()
@@ -17,7 +18,7 @@ pub fn delete(db: &Connection, task_id: Option<i64>) -> () {
         .wait_for_newline(true)
         .interact()
         .unwrap() {
-        return ()
+        return Ok(())
     }
 
     if TaskRepository::delete(db, task_id).is_ok() {
@@ -25,4 +26,5 @@ pub fn delete(db: &Connection, task_id: Option<i64>) -> () {
     } else {
         println!("{}", "Error :(".red())
     }
+    Ok(())
 }

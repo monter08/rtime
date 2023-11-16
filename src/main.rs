@@ -1,13 +1,8 @@
 extern crate alloc;
 extern crate core;
-
 use crate::db::DB;
-use crate::model::{Project, Task};
 use crate::repository::{ProjectRepository, TaskRepository};
-use dialoguer::{Input, Select};
-use sqlite::Connection;
-use clap::{Parser, Subcommand};
-
+use colored::Colorize;
 mod db;
 mod repository;
 mod model;
@@ -21,6 +16,11 @@ fn main() {
     TaskRepository::init(&db);
     ProjectRepository::init(&db);
 
-    cli::start(&db);
+    match cli::start(&db) {
+        Ok(_) => {}
+        Err(err) => {
+            println!("{}", err.to_string().red())
+        }
+    }
 }
 

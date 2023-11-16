@@ -1,6 +1,6 @@
-# Rtime
+# rTime
 
-Rtime is a simple and efficient tool wrtitten in Rust for tracking and managing your work hours. Whether you're a freelancer, remote worker, or just looking to improve your productivity, this application will help you keep a record of your time spent on various tasks and projects.
+rTime is a simple tool wrtitten in Rust for tracking and managing your work hours. Whether you're a freelancer, remote worker, or just looking to improve your productivity, this application will help you keep a record of your time spent on various tasks and projects.
 
 ## Features
 
@@ -23,11 +23,23 @@ curl https://github.com/monter08/rtime/install.sh | bash
 
 ## Usage
 
-@todo
+```bash
+Usage: rtime <COMMAND>
+
+Commands:
+  task     Manage tasks
+  project  Manage projects
+  git      Add Git hook to repository
+  help     Print this message or the help of the given subcommand(s)
+
+Options:
+  -h, --help     Print help
+  -V, --version  Print version
+ ```
 
 ## Contributing
 
-We welcome contributions to the Rtime. If you have ideas for new features, find a bug, or want to improve the code, please feel free to contribute. Here's how you can do it:
+We welcome contributions to the rTime. If you have ideas for new features, find a bug, or want to improve the code, please feel free to contribute. Here's how you can do it:
 
 1. Fork the repository.
 
@@ -56,9 +68,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 If you have any questions or suggestions, feel free to contact us at hello@dstachow.pl
 
 Happy tracking!
-
-![Time Tracker](time-tracker-screenshot.png)
-
----
-
-**Note**: Make sure to replace `your-username` in the installation instructions with your actual GitHub username and customize the contact email and image paths according to your project's structure. Additionally, provide your own application logo and screenshot images.

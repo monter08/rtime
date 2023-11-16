@@ -1,8 +1,9 @@
-use alloc::task;
+
 use clap::{Parser, Subcommand};
 use dialoguer::Select;
 use sqlite::Connection;
 use crate::cli::{git, project, task as tasks};
+use crate::model::Project;
 use crate::repository::ProjectRepository;
 
 #[derive(Subcommand, Debug)]
@@ -47,7 +48,7 @@ pub enum ProjectCommand {
     },
     #[clap(alias="d")]
     Delete {
-        project_id: Option<i64>
+        name: Option<String>
     },
 }
 
@@ -70,10 +71,34 @@ struct Cli {
 }
 
 #[derive(Debug, Clone)]
-pub struct Error;
+pub struct Error {
+    details: String
+}
+
+impl Error {
+    pub fn new(details: String) -> Self {
+        Error {
+            details,
+        }
+    }
+}
+
+impl ToString for Error {
+    fn to_string(&self) -> String {
+        self.details.to_string()
+    }
+}
+
+impl From<sqlite::Error> for Error {
+    fn from(value: sqlite::Error) -> Self {
+        Self {
+            details: format!("DB error: {}", value.to_string())
+        }
+    }
+}
 
 
-pub fn start(db: &Connection) -> () {
+pub fn start(db: &Connection) -> Result<(), Error> {
     let cli = Cli::parse();
 
     match cli.command {
@@ -88,7 +113,7 @@ pub fn start(db: &Connection) -> () {
             match command {
                 ProjectCommand::List => project::list(db),
                 ProjectCommand::Create { name} => project::create(db, name),
-                ProjectCommand::Delete { project_id } => project::delete(db, project_id)
+                ProjectCommand::Delete { name } => project::delete(db, name)
             }
         }
         Commands::Git(command) => {
@@ -97,15 +122,25 @@ pub fn start(db: &Connection) -> () {
                 GitCommand::Clean => git::clean(),
             }
         }
-        _ => {}
     }
 }
 
-pub fn select_project(db: &Connection) -> Result<String, Error> {
-    let list = ProjectRepository::list(&db).expect("Cannot get project list");
+pub fn select_project(db: &Connection, name: Option<String>) -> Result<Project, Error> {
+    if name.is_some() {
+        return match ProjectRepository::find_by_name(db, name.clone().unwrap())? {
+            None => {
+                Err(Error::new(format!("Project: {} does not exists", name.clone().unwrap())))
+            }
+            Some(p) => {
+                Ok(p)
+            }
+        }
+    }
+
+    let list = ProjectRepository::list(&db)?;
 
     if list.is_empty() {
-        Err(Error) // format!("{} {}", "Add project first, try:".red(), "rtime project new".red().bold()
+        return Err(Error::new("Project list is empty, add project first".to_string())) // format!("{} {}", "Add project first, try:".red(), "rtime project new".red().bold()
     }
     else {
         let selection = Select::new()
@@ -115,7 +150,10 @@ pub fn select_project(db: &Connection) -> Result<String, Error> {
             .interact()
             .unwrap();
 
-        Ok(list[selection].to_string())
+        Ok(ProjectRepository::find_by_name(db, list[selection].to_string())?.unwrap())
     }
 }
 
+pub fn minutes_display(m: i64) -> String {
+    format!("{}h {}m", m / 60, m % 60)
+}
